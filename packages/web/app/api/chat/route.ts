@@ -1,7 +1,13 @@
 import { anthropic } from '@ai-sdk/anthropic'
-import { FOTOMAN_TOOLS } from '@fotoman/ai'
-import { getSystemPrompt } from '@fotoman/ai'
-import { type UIMessage, convertToModelMessages, stepCountIs, streamText } from 'ai'
+import { FOTOMAN_TOOLS, getSystemPrompt } from '@fotoman/ai'
+import {
+  type UIMessage,
+  convertToModelMessages,
+  stepCountIs,
+  streamText,
+} from 'ai'
+
+export const maxDuration = 60
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
@@ -14,5 +20,12 @@ export async function POST(req: Request) {
     stopWhen: stepCountIs(10),
   })
 
-  return result.toUIMessageStreamResponse()
+  return result.toUIMessageStreamResponse({
+    onError: (error) => {
+      if (error instanceof Error) {
+        return error.message
+      }
+      return 'Error inesperado. Intente de nuevo.'
+    },
+  })
 }

@@ -24,3 +24,14 @@ export type {
   CaseEventType,
   FotomultaStatus,
 } from '@prisma/client'
+
+export {
+  createCase,
+  getCaseDocument,
+  getCasesByUser,
+  getCaseWithDetails,
+  storeCaseDocument,
+  updateCaseStatus,
+} from './cases.js'
+export { getMessagesByCase, saveMessage } from './messages.js'
+export { findOrCreateUser, findUserByCedula, findUserByPhone } from './users.js'
