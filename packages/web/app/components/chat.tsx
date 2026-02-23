@@ -3,6 +3,98 @@
 import { useChat } from '@ai-sdk/react'
 import { useRef, useEffect, useState } from 'react'
 
+const TOOL_LABELS: Record<string, string> = {
+  lookup_fotomultas: 'Consultando SIMIT',
+  calculate_business_days: 'Calculando dias habiles',
+  add_business_days: 'Calculando fecha',
+  is_business_day: 'Verificando dia habil',
+  get_legal_reference: 'Consultando referencia legal',
+  get_defense_strategy: 'Analizando estrategia de defensa',
+  list_all_defenses: 'Listando defensas disponibles',
+  validate_citation: 'Validando citacion legal',
+  generate_document: 'Generando documento legal',
+}
+
+function downloadPdf(base64: string, filename: string) {
+  const bytes = atob(base64)
+  const arr = new Uint8Array(bytes.length)
+  for (let i = 0; i < bytes.length; i++) {
+    arr[i] = bytes.charCodeAt(i)
+  }
+  const blob = new Blob([arr], { type: 'application/pdf' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function ToolPart({ part }: { part: { type: string; state: string; toolName?: string; input?: Record<string, unknown>; output?: Record<string, unknown>; toolCallId: string } }) {
+  const toolName = part.type.replace('tool-', '')
+  const label = TOOL_LABELS[toolName] ?? toolName
+
+  if (part.state === 'input-streaming' || part.state === 'input-available') {
+    return (
+      <div className="my-2 flex items-center gap-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-500 ring-1 ring-gray-200">
+        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+        <span>{label}...</span>
+      </div>
+    )
+  }
+
+  if (part.state === 'output-error') {
+    return (
+      <div className="my-2 rounded-lg bg-red-50 p-2 text-xs text-red-600 ring-1 ring-red-200">
+        {label}: Error
+      </div>
+    )
+  }
+
+  if (part.state === 'output-available' && toolName === 'generate_document') {
+    const output = part.output as { base64Pdf?: string; sizeBytes?: number; message?: string }
+    return (
+      <div className="my-2 rounded-lg bg-green-50 p-3 ring-1 ring-green-200">
+        <div className="mb-2 flex items-center gap-2 text-xs text-green-700">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span className="font-medium">Documento generado</span>
+          {output?.sizeBytes && (
+            <span className="text-green-500">({Math.round(output.sizeBytes / 1024)} KB)</span>
+          )}
+        </div>
+        {output?.base64Pdf && (
+          <button
+            onClick={() => downloadPdf(output.base64Pdf!, `derecho-de-peticion-${Date.now()}.pdf`)}
+            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700"
+          >
+            Descargar PDF
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  if (part.state === 'output-available' && toolName === 'lookup_fotomultas') {
+    const output = part.output as { found?: boolean; count?: number }
+    return (
+      <div className="my-2 rounded-lg bg-blue-50 p-2 text-xs text-blue-700 ring-1 ring-blue-200">
+        <span className="font-medium">{label}</span>
+        {output?.found && <span className="ml-2">{output.count} fotomulta(s) encontrada(s)</span>}
+        {!output?.found && <span className="ml-2">No se encontraron fotomultas</span>}
+      </div>
+    )
+  }
+
+  return (
+    <div className="my-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-500 ring-1 ring-gray-200">
+      <span className="font-medium">{label}</span>
+      <span className="ml-2 text-green-600">completado</span>
+    </div>
+  )
+}
+
 export function Chat() {
   const [input, setInput] = useState('')
   const { messages, sendMessage, status, error } = useChat()
@@ -65,29 +157,22 @@ export function Chat() {
                 }`}
               >
                 {message.parts.map((part, i) => {
-                  switch (part.type) {
-                    case 'text':
-                      return (
-                        <div key={`${message.id}-${i}`} className="whitespace-pre-wrap">
-                          {part.text}
-                        </div>
-                      )
-                    default:
-                      if (part.type.startsWith('tool-')) {
-                        return (
-                          <div
-                            key={`${message.id}-${i}`}
-                            className="my-2 rounded-lg bg-gray-50 p-2 text-xs text-gray-500 ring-1 ring-gray-200"
-                          >
-                            <span className="font-medium">
-                              {part.type.replace('tool-', '')}
-                            </span>
-                            <span className="ml-2 text-green-600">completado</span>
-                          </div>
-                        )
-                      }
-                      return null
+                  if (part.type === 'text') {
+                    return (
+                      <div key={`${message.id}-${i}`} className="whitespace-pre-wrap">
+                        {part.text}
+                      </div>
+                    )
                   }
+                  if (part.type.startsWith('tool-')) {
+                    return (
+                      <ToolPart
+                        key={`${message.id}-${i}`}
+                        part={part as unknown as Parameters<typeof ToolPart>[0]['part']}
+                      />
+                    )
+                  }
+                  return null
                 })}
               </div>
             </div>

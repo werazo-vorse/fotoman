@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  WEB
+  WHATSAPP
+}
+
+enum CaseStatus {
+  ANALYZING
+  DOCUMENT_READY
+  PAYMENT_PENDING
+  PAID
+  SUBMITTED
+  AWAITING_RESPONSE
+  RESPONDED
+  RESOLVED
+  ESCALATED
+}
+
+enum CaseEventType {
+  CREATED
+  ANALYSIS_COMPLETE
+  DOCUMENT_GENERATED
+  PAYMENT_RECEIVED
+  SUBMITTED
+  DEADLINE_WARNING
+  DEADLINE_EXPIRED
+  RESPONSE_RECEIVED
+  ESCALATED
+  RESOLVED
+  NOTE
+}
+
+enum FotomultaStatus {
+  PENDING
+  RESOLUTION
+  COBRO_COACTIVO
+  PAID
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  cedula    String   @unique
+  email     String?
+  phone     String?
+  address   String?
+  platform  Platform @default(WEB)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  vehicles Vehicle[]
+  cases    Case[]
+
+  @@map("users")
+}
+
+model Vehicle {
+  id      String @id @default(cuid())
+  plate   String @unique
+  type    String
+  brand   String
+  ownerId String @map("owner_id")
+
+  owner      User        @relation(fields: [ownerId], references: [id])
+  fotomultas Fotomulta[]
+
+  @@map("vehicles")
+}
+
+model Fotomulta {
+  id                    String          @id @default(cuid())
+  comparendoNumber      String          @unique @map("comparendo_number")
+  resolutionNumber      String?         @map("resolution_number")
+  infractionDate        DateTime        @map("infraction_date")
+  notificationDate      DateTime?       @map("notification_date")
+  resolutionDate        DateTime?       @map("resolution_date")
+  infractionCode        String          @map("infraction_code")
+  infractionDescription String          @map("infraction_description")
+  amount                Int
+  status                FotomultaStatus @default(PENDING)
+  cameraLocation        String?         @map("camera_location")
+  vehicleId             String          @map("vehicle_id")
+
+  vehicle       Vehicle         @relation(fields: [vehicleId], references: [id])
+  caseFotomultas CaseFotomulta[]
+
+  @@map("fotomultas")
+}
+
+model Case {
+  id               String     @id @default(cuid())
+  userId           String     @map("user_id")
+  status           CaseStatus @default(ANALYZING)
+  defensesApplied  String[]   @map("defenses_applied")
+  documentUrl      String?    @map("document_url")
+  documentPdf      Bytes?     @map("document_pdf")
+  submissionDate   DateTime?  @map("submission_date")
+  submissionProof  String?    @map("submission_proof")
+  paymentId        String?    @map("payment_id")
+  deadlineDate     DateTime?  @map("deadline_date")
+  authorityEmail   String?    @map("authority_email")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  user           User            @relation(fields: [userId], references: [id])
+  caseFotomultas CaseFotomulta[]
+  events         CaseEvent[]
+  messages       Message[]
+
+  @@map("cases")
+}
+
+model CaseFotomulta {
+  caseId      String @map("case_id")
+  fotomultaId String @map("fotomulta_id")
+
+  case      Case      @relation(fields: [caseId], references: [id])
+  fotomulta Fotomulta @relation(fields: [fotomultaId], references: [id])
+
+  @@id([caseId, fotomultaId])
+  @@map("case_fotomultas")
+}
+
+model CaseEvent {
+  id        String        @id @default(cuid())
+  caseId    String        @map("case_id")
+  type      CaseEventType
+  details   String?
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  case Case @relation(fields: [caseId], references: [id])
+
+  @@map("case_events")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  caseId    String   @map("case_id")
+  role      String
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  case Case @relation(fields: [caseId], references: [id])
+
+  @@map("messages")
+}
