@@ -97,7 +97,7 @@ AI-assisted legal document generation with guardrails.
 - **Legal boilerplate sections are fixed templates** -- Fundamentos de Derecho, Peticiones, Refutacion. These contain exact law citations that must not be hallucinated.
 - **Hybrid approach**: AI-generated narrative + template-based legal precision
 - Validates all legal references against the Knowledge Base before PDF generation
-- Uses pdfme for final PDF rendering
+- Uses pdf-lib for final PDF rendering
 
 ### 5. Tool: Submission Engine
 Files the derecho de peticion on behalf of the user.
@@ -232,14 +232,14 @@ fotoman/
 ```
 web ──────→ ai, core, db, pdf
 whatsapp ─→ ai, core, db, pdf
-jobs ─────→ ai, core, db
-ai ───────→ core  (agent uses core tools)
+jobs ─────→ core, db
+ai ───────→ core, pdf  (agent uses core tools + generates PDFs)
 pdf ──────→ core
-core ─────→ (nothing -- zero deps)
+core ─────→ (nothing -- zero deps, except resend for email)
 ```
 
-`core` = deterministic functions (calendar, date math, legal KB data).
-`ai` = the agent that reasons using core tools + LLM. Depends on core, nothing else.
+`core` = deterministic functions (calendar, date math, legal KB, email).
+`ai` = the agent that reasons using core tools + LLM. 10 tools total.
 Both `web` and `whatsapp` are thin interfaces that call into `ai`.
 
 ## Development Methodology
