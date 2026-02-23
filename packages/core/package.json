@@ -19,6 +19,10 @@
     "./email": {
       "types": "./src/email/index.ts",
       "import": "./src/email/index.ts"
+    },
+    "./whatsapp": {
+      "types": "./src/whatsapp/index.ts",
+      "import": "./src/whatsapp/index.ts"
     }
   },
   "scripts": {
