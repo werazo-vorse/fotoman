@@ -1,0 +1,22 @@
+{
+  "name": "fotoman",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm -r test",
+    "check": "pnpm -r check",
+    "check:fix": "pnpm -r check:fix",
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @fotoman/web dev"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

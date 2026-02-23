@@ -1,0 +1,32 @@
+{
+  "name": "@fotoman/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./calendar": {
+      "types": "./src/calendar/index.ts",
+      "import": "./src/calendar/index.ts"
+    },
+    "./legal-kb": {
+      "types": "./src/legal-kb/index.ts",
+      "import": "./src/legal-kb/index.ts"
+    },
+    "./simit": {
+      "types": "./src/simit/index.ts",
+      "import": "./src/simit/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "colombian-holidays": "^5.0.0"
+  }
+}
