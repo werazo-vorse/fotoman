@@ -13,6 +13,7 @@ const TOOL_LABELS: Record<string, string> = {
   list_all_defenses: 'Listando defensas disponibles',
   validate_citation: 'Validando citacion legal',
   generate_document: 'Generando documento legal',
+  submit_petition: 'Enviando peticion por correo',
 }
 
 function downloadPdf(base64: string, filename: string) {
@@ -71,6 +72,25 @@ function ToolPart({ part }: { part: { type: string; state: string; toolName?: st
           >
             Descargar PDF
           </button>
+        )}
+      </div>
+    )
+  }
+
+  if (part.state === 'output-available' && toolName === 'submit_petition') {
+    const output = part.output as { submitted?: boolean; messageId?: string; message?: string }
+    return (
+      <div className={`my-2 rounded-lg p-3 ring-1 ${output?.submitted ? 'bg-green-50 ring-green-200' : 'bg-red-50 ring-red-200'}`}>
+        <div className={`flex items-center gap-2 text-xs ${output?.submitted ? 'text-green-700' : 'text-red-700'}`}>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span className="font-medium">
+            {output?.submitted ? 'Peticion enviada' : 'Error al enviar'}
+          </span>
+        </div>
+        {output?.messageId && (
+          <p className="mt-1 text-xs text-gray-500">ID: {output.messageId}</p>
         )}
       </div>
     )

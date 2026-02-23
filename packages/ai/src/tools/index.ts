@@ -11,3 +11,4 @@ export {
   validateCitationTool,
 } from './legal-kb.js'
 export { generateDocumentTool } from './document.js'
+export { submitPetitionTool } from './submit.js'

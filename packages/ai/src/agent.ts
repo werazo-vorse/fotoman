@@ -10,6 +10,7 @@ import {
   isBusinessDayTool,
   listAllDefensesTool,
   lookupFotomultasTool,
+  submitPetitionTool,
   validateCitationTool,
 } from './tools/index.js'
 
@@ -23,6 +24,7 @@ export const FOTOMAN_TOOLS = {
   list_all_defenses: listAllDefensesTool,
   validate_citation: validateCitationTool,
   generate_document: generateDocumentTool,
+  submit_petition: submitPetitionTool,
 } as const
 
 export interface FotomanAgentConfig {

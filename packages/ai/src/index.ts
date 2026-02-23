@@ -10,5 +10,6 @@ export {
   isBusinessDayTool,
   listAllDefensesTool,
   lookupFotomultasTool,
+  submitPetitionTool,
   validateCitationTool,
 } from './tools/index.js'
