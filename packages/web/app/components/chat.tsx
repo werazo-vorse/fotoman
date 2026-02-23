@@ -13,6 +13,7 @@ const TOOL_LABELS: Record<string, string> = {
   list_all_defenses: 'Listando defensas disponibles',
   validate_citation: 'Validando citacion legal',
   generate_document: 'Generando documento legal',
+  create_payment: 'Generando enlace de pago',
   submit_petition: 'Enviando peticion por correo',
 }
 
@@ -73,6 +74,35 @@ function ToolPart({ part }: { part: { type: string; state: string; toolName?: st
             Descargar PDF
           </button>
         )}
+      </div>
+    )
+  }
+
+  if (part.state === 'output-available' && toolName === 'create_payment') {
+    const output = part.output as { paymentUrl?: string | null; amount?: string; error?: string }
+    if (output?.paymentUrl) {
+      return (
+        <div className="my-2 rounded-lg bg-yellow-50 p-3 ring-1 ring-yellow-200">
+          <div className="mb-2 flex items-center gap-2 text-xs text-yellow-700">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+            <span className="font-medium">Pago requerido: {output.amount}</span>
+          </div>
+          <a
+            href={output.paymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-yellow-600"
+          >
+            Pagar ahora
+          </a>
+        </div>
+      )
+    }
+    return (
+      <div className="my-2 rounded-lg bg-red-50 p-2 text-xs text-red-600 ring-1 ring-red-200">
+        Error al crear pago: {output?.error ?? 'Error desconocido'}
       </div>
     )
   }

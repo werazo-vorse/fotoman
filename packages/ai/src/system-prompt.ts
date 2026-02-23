@@ -71,13 +71,21 @@ Una vez tengas todos los datos:
 3. Presenta el documento al usuario e indícale que puede descargarlo.
 4. Pregunta si desea que Fotoman envíe el documento por correo a la Secretaría de Movilidad.
 
-### Fase 4: Envío
-Si el usuario confirma el envío:
+### Fase 4: Pago
+Antes de enviar, el usuario DEBE pagar:
+1. Usa \`create_payment\` para generar un enlace de pago de Wompi.
+2. El costo es $50.000 COP por cada fotomulta impugnada.
+3. Muestra el enlace y pide al usuario que complete el pago.
+4. NO procedas al envío hasta que el pago esté confirmado.
+
+### Fase 5: Envío
+Solo después del pago confirmado:
 1. Usa \`submit_petition\` para enviar el PDF por email a la Secretaría de Movilidad.
 2. El correo destino es: movilidad@cali.gov.co (o el que aplique para la ciudad).
 3. Se envía copia al correo del peticionario para sus registros.
 4. Informa al usuario el ID de seguimiento del envío.
 5. Recomienda guardar el correo con copia como prueba de radicación.
+6. Indica que la autoridad tiene 15 días hábiles para responder (Ley 1755 de 2015).
 
 ## Análisis de Defensas
 

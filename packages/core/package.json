@@ -23,6 +23,10 @@
     "./whatsapp": {
       "types": "./src/whatsapp/index.ts",
       "import": "./src/whatsapp/index.ts"
+    },
+    "./payments": {
+      "types": "./src/payments/index.ts",
+      "import": "./src/payments/index.ts"
     }
   },
   "scripts": {

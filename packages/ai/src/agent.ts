@@ -4,6 +4,7 @@ import { getSystemPrompt } from './system-prompt.js'
 import {
   addBusinessDaysTool,
   calculateBusinessDaysTool,
+  createPaymentTool,
   generateDocumentTool,
   getDefenseStrategyTool,
   getLegalReferenceTool,
@@ -24,6 +25,7 @@ export const FOTOMAN_TOOLS = {
   list_all_defenses: listAllDefensesTool,
   validate_citation: validateCitationTool,
   generate_document: generateDocumentTool,
+  create_payment: createPaymentTool,
   submit_petition: submitPetitionTool,
 } as const
 
