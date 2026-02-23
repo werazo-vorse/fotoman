@@ -4,6 +4,7 @@ export { getSystemPrompt } from './system-prompt.js'
 export {
   addBusinessDaysTool,
   calculateBusinessDaysTool,
+  generateDocumentTool,
   getDefenseStrategyTool,
   getLegalReferenceTool,
   isBusinessDayTool,

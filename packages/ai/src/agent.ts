@@ -4,6 +4,7 @@ import { getSystemPrompt } from './system-prompt.js'
 import {
   addBusinessDaysTool,
   calculateBusinessDaysTool,
+  generateDocumentTool,
   getDefenseStrategyTool,
   getLegalReferenceTool,
   isBusinessDayTool,
@@ -21,6 +22,7 @@ export const FOTOMAN_TOOLS = {
   get_defense_strategy: getDefenseStrategyTool,
   list_all_defenses: listAllDefensesTool,
   validate_citation: validateCitationTool,
+  generate_document: generateDocumentTool,
 } as const
 
 export interface FotomanAgentConfig {

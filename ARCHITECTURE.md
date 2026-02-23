@@ -192,7 +192,7 @@ All user personal data (cedula, name, address, phone) encrypted at rest. Case me
 | **Web + API** | **Next.js 15 (App Router)** | UI + API + AI routes. `useChat` hook for streaming agent responses |
 | **Styling** | **Tailwind CSS** | Mobile-first utility classes |
 | **Database** | **PostgreSQL + Prisma** | Case data, conversation history, user data (encrypted via pgcrypto) |
-| **PDF** | **pdfme** | JSON template-based PDF generation. AI writes hechos, template holds legal boilerplate |
+| **PDF** | **pdf-lib** | Programmatic PDF generation. AI writes hechos, template functions hold legal boilerplate |
 | **Jobs** | **BullMQ + Redis** | Deadline monitoring, background case tracking |
 | **WhatsApp** | **Meta Cloud API** | Message I/O. Agent responses streamed back as WhatsApp messages |
 | **Payments** | **Wompi** | Nequi, Daviplata, PSE, cards. Single Colombian gateway |
@@ -220,7 +220,7 @@ fotoman/
 │   │                     Guardrail validators
 │   ├── web/            → Next.js 15 (UI + AI chat route + API routes)
 │   ├── whatsapp/       → WhatsApp webhook → agent bridge
-│   ├── pdf/            → pdfme templates + hybrid generator (AI narrative + legal templates)
+│   ├── pdf/            → pdf-lib generator (AI narrative + legal template functions)
 │   ├── jobs/           → BullMQ workers (deadline tracker, notification dispatcher)
 │   └── db/             → Prisma schema, migrations, encryption helpers
 ├── package.json

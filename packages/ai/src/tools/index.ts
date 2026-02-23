@@ -10,3 +10,4 @@ export {
   listAllDefensesTool,
   validateCitationTool,
 } from './legal-kb.js'
+export { generateDocumentTool } from './document.js'
