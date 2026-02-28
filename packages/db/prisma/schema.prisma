@@ -20,8 +20,17 @@ enum CaseStatus {
   SUBMITTED
   AWAITING_RESPONSE
   RESPONDED
+  DEADLINE_EXPIRED
   RESOLVED
   ESCALATED
+}
+
+enum CaseOutcome {
+  WON
+  LOST
+  PARTIAL
+  NO_RESPONSE
+  PENDING
 }
 
 enum CaseEventType {
@@ -104,6 +113,7 @@ model Case {
   documentPdf      Bytes?     @map("document_pdf")
   submissionDate   DateTime?  @map("submission_date")
   submissionProof  String?    @map("submission_proof")
+  submissionMessageId String? @map("submission_message_id")
   paymentId        String?    @map("payment_id")
   deadlineDate     DateTime?  @map("deadline_date")
   authorityEmail   String?    @map("authority_email")
@@ -114,6 +124,7 @@ model Case {
   caseFotomultas CaseFotomulta[]
   events         CaseEvent[]
   messages       Message[]
+  result         CaseResult?
 
   @@map("cases")
 }
@@ -151,4 +162,54 @@ model Message {
   case Case @relation(fields: [caseId], references: [id])
 
   @@map("messages")
+}
+
+model CaseResult {
+  id              String      @id @default(cuid())
+  caseId          String      @unique @map("case_id")
+  outcome         CaseOutcome @default(PENDING)
+  responseDate    DateTime?   @map("response_date")
+  responseText    String?     @map("response_text")
+  responsePdf     Bytes?      @map("response_pdf")
+  authorityName   String      @map("authority_name")
+  inboundEmailId  String?     @map("inbound_email_id")
+  aiAnalysis      String?     @map("ai_analysis")
+  lessonsLearned  String?     @map("lessons_learned")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  case           Case            @relation(fields: [caseId], references: [id])
+  defenseResults DefenseResult[]
+
+  @@map("case_results")
+}
+
+model DefenseResult {
+  id              String  @id @default(cuid())
+  caseResultId    String  @map("case_result_id")
+  defenseKey      String  @map("defense_key")
+  effective       Boolean
+  rejectionReason String? @map("rejection_reason")
+  counterArgument String? @map("counter_argument")
+
+  caseResult CaseResult @relation(fields: [caseResultId], references: [id])
+
+  @@unique([caseResultId, defenseKey])
+  @@map("defense_results")
+}
+
+model DefenseEffectiveness {
+  id             String   @id @default(cuid())
+  defenseKey     String   @map("defense_key")
+  authorityName  String   @map("authority_name")
+  totalCases     Int      @map("total_cases")
+  wins           Int
+  losses         Int
+  winRate        Float    @map("win_rate")
+  topRejections  String[] @map("top_rejections")
+  topCounterArgs String[] @map("top_counter_args")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@unique([defenseKey, authorityName])
+  @@map("defense_effectiveness")
 }

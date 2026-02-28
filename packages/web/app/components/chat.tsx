@@ -46,9 +46,10 @@ function ToolPart({ part }: { part: { type: string; state: string; toolName?: st
   }
 
   if (part.state === 'output-error') {
+    const errorText = (part as unknown as { errorText?: string }).errorText
     return (
       <div className="my-2 rounded-lg bg-red-50 p-2 text-xs text-red-600 ring-1 ring-red-200">
-        {label}: Error
+        {label}: {errorText ?? 'Error'}
       </div>
     )
   }
@@ -127,11 +128,11 @@ function ToolPart({ part }: { part: { type: string; state: string; toolName?: st
   }
 
   if (part.state === 'output-available' && toolName === 'lookup_fotomultas') {
-    const output = part.output as { found?: boolean; count?: number }
+    const output = part.output as { found?: boolean; fotomultaCount?: number }
     return (
       <div className="my-2 rounded-lg bg-blue-50 p-2 text-xs text-blue-700 ring-1 ring-blue-200">
         <span className="font-medium">{label}</span>
-        {output?.found && <span className="ml-2">{output.count} fotomulta(s) encontrada(s)</span>}
+        {output?.found && <span className="ml-2">{output.fotomultaCount} fotomulta(s) encontrada(s)</span>}
         {!output?.found && <span className="ml-2">No se encontraron fotomultas</span>}
       </div>
     )
@@ -170,7 +171,7 @@ export function Chat() {
       <header className="border-b border-gray-200 bg-white px-6 py-4">
         <h1 className="text-xl font-bold text-gray-900">Fotoman</h1>
         <p className="text-sm text-gray-500">
-          Asistente legal AI para impugnar fotomultas en Cali
+          Asistente legal para impugnar fotomultas en Cali
         </p>
       </header>
 

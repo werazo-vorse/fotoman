@@ -66,8 +66,10 @@ export const getDefenseStrategyTool = tool({
 
 export const listAllDefensesTool = tool({
   description:
-    'Lista todas las estrategias de defensa disponibles contra fotomultas con sus claves y descripciones.',
-  inputSchema: z.object({}),
+    'Lista todas las estrategias de defensa disponibles contra fotomultas con sus claves y descripciones. No requiere parámetros.',
+  inputSchema: z.object({
+    _unused: z.string().optional().describe('No se usa. Enviar cadena vacía o no incluir.'),
+  }),
   execute: async () => {
     const strategies = getAllStrategies()
     return {

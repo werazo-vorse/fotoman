@@ -6,6 +6,7 @@ export interface Fotomulta {
   infractionDate: string
   notificationDate: string | null
   resolutionDate: string | null
+  cobroCoactivoDate: string | null
   infractionCode: string
   infractionDescription: string
   amount: number

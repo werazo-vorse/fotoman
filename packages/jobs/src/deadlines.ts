@@ -13,15 +13,21 @@ export interface DeadlineJobData {
 
 let queue: Queue<DeadlineJobData> | null = null
 
+function parseRedisUrl(urlStr: string) {
+  const url = new URL(urlStr)
+  return {
+    host: url.hostname,
+    port: Number(url.port) || 6379,
+    password: url.password || undefined,
+    tls: url.protocol === 'rediss:' ? {} : undefined,
+  }
+}
+
 function getQueue(): Queue<DeadlineJobData> {
   if (!queue) {
     const redisUrl = process.env['REDIS_URL'] ?? 'redis://localhost:6379'
-    const url = new URL(redisUrl)
     queue = new Queue<DeadlineJobData>(QUEUE_NAME, {
-      connection: {
-        host: url.hostname,
-        port: Number(url.port) || 6379,
-      },
+      connection: parseRedisUrl(redisUrl),
     })
   }
   return queue

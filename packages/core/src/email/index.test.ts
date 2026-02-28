@@ -50,16 +50,26 @@ describe('sendPetition', () => {
 })
 
 describe('buildSubmissionSubject', () => {
-  it('formats single resolution', () => {
+  it('defaults to revocatoria directa when no defenseKeys', () => {
     const subject = buildSubmissionSubject(['0001887446'])
-    expect(subject).toBe('Impugnación Resoluciones No. 0001887446 - Derecho de Petición')
+    expect(subject).toBe('Revocatoria Directa Resoluciones No. 0001887446 - Derecho de Petición')
   })
 
   it('formats multiple resolutions', () => {
     const subject = buildSubmissionSubject(['0001887446', '0001936615'])
     expect(subject).toBe(
-      'Impugnación Resoluciones No. 0001887446 y No. 0001936615 - Derecho de Petición',
+      'Revocatoria Directa Resoluciones No. 0001887446 y No. 0001936615 - Derecho de Petición',
     )
+  })
+
+  it('uses prescripcion when defense key is present', () => {
+    const subject = buildSubmissionSubject(['0001887446'], ['prescripcion'])
+    expect(subject).toBe('Prescripción Resoluciones No. 0001887446 - Derecho de Petición')
+  })
+
+  it('uses caducidad when defense key is present', () => {
+    const subject = buildSubmissionSubject(['0001887446'], ['caducidad'])
+    expect(subject).toBe('Caducidad Resoluciones No. 0001887446 - Derecho de Petición')
   })
 })
 

@@ -24,7 +24,9 @@ const SAMPLE_FOTOMULTAS = [
   },
 ]
 
-function buildSampleInput(): PetitionInput {
+const DEFAULT_DEFENSES = ['indebida-notificacion', 'conductor-no-identificado']
+
+function buildSampleInput(defenseKeys: string[] = DEFAULT_DEFENSES): PetitionInput {
   return {
     city: 'Cali',
     date: '09/02/2026',
@@ -50,9 +52,9 @@ function buildSampleInput(): PetitionInput {
       'A la fecha, no he recibido notificación personal ni por correo certificado de los actos administrativos que dieron origen a estas sanciones.',
       'La falta de notificación oportuna me ha impedido ejercer mi derecho a la defensa y contradicción, vulnerando el Debido Proceso administrativo consagrado en el artículo 29 de la Constitución Política.',
     ],
-    peticiones: buildDefaultPeticiones(SAMPLE_FOTOMULTAS),
-    fundamentosDeDerecho: buildFundamentos(['indebida-notificacion', 'conductor-no-identificado']),
-    refutacion: buildDefaultRefutacion(),
+    peticiones: buildDefaultPeticiones(SAMPLE_FOTOMULTAS, defenseKeys),
+    fundamentosDeDerecho: buildFundamentos(defenseKeys),
+    refutacion: buildDefaultRefutacion(defenseKeys),
     pruebas: buildDefaultPruebas(SAMPLE_FOTOMULTAS),
   }
 }
@@ -82,23 +84,76 @@ describe('generatePetitionPdf', () => {
   it('works with a single fotomulta', async () => {
     const input = buildSampleInput()
     input.fotomultas = [SAMPLE_FOTOMULTAS[0]!]
-    input.peticiones = buildDefaultPeticiones([SAMPLE_FOTOMULTAS[0]!])
+    input.peticiones = buildDefaultPeticiones([SAMPLE_FOTOMULTAS[0]!], DEFAULT_DEFENSES)
     input.pruebas = buildDefaultPruebas([SAMPLE_FOTOMULTAS[0]!])
     const pdf = await generatePetitionPdf(input)
     expect(pdf.length).toBeGreaterThan(0)
   })
+
+  it('generates valid PDF for prescripcion defense', async () => {
+    const input = buildSampleInput(['prescripcion'])
+    const pdf = await generatePetitionPdf(input)
+    const doc = await PDFDocument.load(pdf)
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(2)
+  })
+
+  it('generates valid PDF for caducidad defense', async () => {
+    const input = buildSampleInput(['caducidad'])
+    const pdf = await generatePetitionPdf(input)
+    const doc = await PDFDocument.load(pdf)
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(1)
+  })
 })
 
 describe('templates', () => {
-  it('buildDefaultPeticiones returns 4 items', () => {
-    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS)
-    expect(peticiones).toHaveLength(4)
+  it('buildDefaultPeticiones returns 6 items for notificacion defense', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['indebida-notificacion'])
+    expect(peticiones).toHaveLength(6)
+    expect(peticiones[0]).toContain('NULIDAD')
   })
 
-  it('buildDefaultPeticiones includes resolution numbers', () => {
-    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS)
+  it('buildDefaultPeticiones returns 8 items for prescripcion defense', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['prescripcion'])
+    expect(peticiones).toHaveLength(8)
+    expect(peticiones[0]).toContain('prescripción')
+  })
+
+  it('buildDefaultPeticiones returns 6 items for caducidad defense', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['caducidad'])
+    expect(peticiones).toHaveLength(6)
+    expect(peticiones[0]).toContain('caducidad')
+  })
+
+  it('buildDefaultPeticiones for prescripcion includes comparendo numbers and dates', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['prescripcion'])
+    expect(peticiones[0]).toContain('76001000000045904867')
+    expect(peticiones[0]).toContain('15/01/2025')
+  })
+
+  it('buildDefaultPeticiones includes resolution numbers for notificacion', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['indebida-notificacion'])
     expect(peticiones[0]).toContain('0001887446')
     expect(peticiones[0]).toContain('0001936615')
+  })
+
+  it('buildDefaultPeticiones for prescripcion includes fallback cobro coactivo request', () => {
+    const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, ['prescripcion'])
+    expect(peticiones[1]).toContain('cobro coactivo')
+    expect(peticiones[1]).toContain('mandamiento de pago')
+  })
+
+  it('buildDefaultPeticiones always includes electronic delivery request', () => {
+    for (const defense of ['indebida-notificacion', 'prescripcion', 'caducidad']) {
+      const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, [defense])
+      expect(peticiones.some((p) => p.includes('correo electrónico') && p.includes('Ley 962'))).toBe(true)
+    }
+  })
+
+  it('buildDefaultPeticiones always includes testigo signature request', () => {
+    for (const defense of ['indebida-notificacion', 'prescripcion', 'caducidad']) {
+      const peticiones = buildDefaultPeticiones(SAMPLE_FOTOMULTAS, [defense])
+      expect(peticiones.some((p) => p.includes('testigo') && p.includes('artículo 135'))).toBe(true)
+    }
   })
 
   it('buildFundamentos includes Debido Proceso for any defense', () => {
@@ -119,18 +174,39 @@ describe('templates', () => {
     expect(titles.some((t) => t.includes('C-038'))).toBe(true)
   })
 
-  it('buildFundamentos includes caducidad article', () => {
+  it('buildFundamentos includes caducidad article and CPACA art 52', () => {
     const fundamentos = buildFundamentos(['caducidad'])
     const titles = fundamentos.map((f) => f.title)
-    expect(titles.some((t) => t.includes('CADUCIDAD'))).toBe(true)
+    expect(titles.some((t) => t.includes('161'))).toBe(true)
+    expect(titles.some((t) => t.includes('Ley 1437'))).toBe(true)
   })
 
-  it('buildDefaultRefutacion returns non-empty string', () => {
-    expect(buildDefaultRefutacion().length).toBeGreaterThan(100)
+  it('buildFundamentos includes prescripcion article plus art 52 and art 826', () => {
+    const fundamentos = buildFundamentos(['prescripcion'])
+    const titles = fundamentos.map((f) => f.title)
+    expect(titles.some((t) => t.includes('159'))).toBe(true)
+    expect(titles.some((t) => t.includes('Ley 1437'))).toBe(true)
+    expect(titles.some((t) => t.includes('826'))).toBe(true)
   })
 
-  it('buildDefaultPruebas references resolution numbers', () => {
+  it('buildFundamentos always includes derecho de peticion', () => {
+    for (const defense of ['indebida-notificacion', 'prescripcion', 'caducidad']) {
+      const fundamentos = buildFundamentos([defense])
+      const titles = fundamentos.map((f) => f.title)
+      expect(titles.some((t) => t.includes('DERECHO DE PETICIÓN'))).toBe(true)
+    }
+  })
+
+  it('buildDefaultRefutacion returns defense-specific text', () => {
+    expect(buildDefaultRefutacion(['prescripcion'])).toContain('cobro coactivo')
+    expect(buildDefaultRefutacion(['caducidad'])).toContain('artículo 52')
+    expect(buildDefaultRefutacion(['indebida-notificacion'])).toContain('Ley 1843')
+  })
+
+  it('buildDefaultPruebas includes cedula and SIMIT screenshots', () => {
     const pruebas = buildDefaultPruebas(SAMPLE_FOTOMULTAS)
-    expect(pruebas[0]).toContain('0001887446')
+    expect(pruebas).toHaveLength(2)
+    expect(pruebas[0]).toContain('cédula')
+    expect(pruebas[1]).toContain('0001887446')
   })
 })

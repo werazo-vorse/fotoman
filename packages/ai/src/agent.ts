@@ -3,6 +3,7 @@ import { stepCountIs, streamText } from 'ai'
 import { getSystemPrompt } from './system-prompt.js'
 import {
   addBusinessDaysTool,
+  analyzeResponseTool,
   calculateBusinessDaysTool,
   createPaymentTool,
   generateDocumentTool,
@@ -11,6 +12,7 @@ import {
   isBusinessDayTool,
   listAllDefensesTool,
   lookupFotomultasTool,
+  queryEffectivenessTool,
   submitPetitionTool,
   validateCitationTool,
 } from './tools/index.js'
@@ -27,6 +29,8 @@ export const FOTOMAN_TOOLS = {
   generate_document: generateDocumentTool,
   create_payment: createPaymentTool,
   submit_petition: submitPetitionTool,
+  analyze_response: analyzeResponseTool,
+  query_effectiveness: queryEffectivenessTool,
 } as const
 
 export interface FotomanAgentConfig {

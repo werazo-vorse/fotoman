@@ -1,4 +1,4 @@
-import { anthropic } from '@ai-sdk/anthropic'
+import { createGroq } from '@ai-sdk/groq'
 import { FOTOMAN_TOOLS, getSystemPrompt } from '@fotoman/ai'
 import {
   extractMessages,
@@ -7,6 +7,8 @@ import {
 } from '@fotoman/core/whatsapp'
 import type { WhatsAppWebhookBody } from '@fotoman/core/whatsapp'
 import { generateText, type ModelMessage, stepCountIs } from 'ai'
+
+const groq = createGroq()
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -52,7 +54,7 @@ async function processMessage(from: string, name: string, text: string) {
 
   try {
     const { text: responseText } = await generateText({
-      model: anthropic('claude-sonnet-4-20250514'),
+      model: groq('llama-3.3-70b-versatile'),
       system: getSystemPrompt(),
       messages: conversationMessages,
       tools: FOTOMAN_TOOLS,

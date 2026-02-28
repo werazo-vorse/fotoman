@@ -32,9 +32,24 @@ export interface PetitionInput {
   petitioner: PetitionerInfo
   vehicle: VehicleInfo
   fotomultas: FotomultaRef[]
+  defenseKeys?: string[]
   hechos: string[]
   peticiones: string[]
   fundamentosDeDerecho: FundamentoDeDerecho[]
   refutacion: string
+  pruebas: string[]
+}
+
+export interface TutelaInput {
+  city: string
+  date: string
+  petitioner: PetitionerInfo
+  authority: string
+  authorityAddress: string
+  authorityNotificationEmail: string
+  originalPetitionDate: string
+  originalPetitionSubject: string
+  businessDaysElapsed: number
+  peticiones: string[]
   pruebas: string[]
 }

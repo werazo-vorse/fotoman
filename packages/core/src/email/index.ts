@@ -2,8 +2,8 @@ import type { SubmissionInput, SubmissionResult } from './types.js'
 
 export type { SubmissionInput, SubmissionResult }
 
-const SYSTEM_FROM_EMAIL = 'peticiones@fotoman.co'
-const SYSTEM_FROM_NAME = 'Fotoman - Defensa Legal'
+const SYSTEM_FROM_EMAIL = process.env['FROM_EMAIL'] ?? 'onboarding@resend.dev'
+const SYSTEM_FROM_NAME = process.env['FROM_NAME'] ?? 'Fotoman - Defensa Legal'
 
 async function sendViaResend(input: SubmissionInput): Promise<SubmissionResult> {
   const apiKey = process.env['RESEND_API_KEY']
@@ -16,9 +16,12 @@ async function sendViaResend(input: SubmissionInput): Promise<SubmissionResult> 
     const resend = new Resend(apiKey)
 
     const pdfBase64 = Buffer.from(input.pdfBuffer).toString('base64')
+    const fromAddress = `${SYSTEM_FROM_NAME} <${SYSTEM_FROM_EMAIL}>`
+
+    console.log(`[EMAIL] Sending from: ${fromAddress}, to: ${input.toEmail}, cc: ${input.ccEmail}`)
 
     const { data, error } = await resend.emails.send({
-      from: `${SYSTEM_FROM_NAME} <${SYSTEM_FROM_EMAIL}>`,
+      from: fromAddress,
       to: [input.toEmail],
       cc: [input.ccEmail],
       subject: input.subject,
@@ -33,12 +36,15 @@ async function sendViaResend(input: SubmissionInput): Promise<SubmissionResult> 
     })
 
     if (error) {
+      console.error('[EMAIL] Resend error:', error)
       return { success: false, error: error.message }
     }
 
+    console.log('[EMAIL] Sent successfully, messageId:', data?.id)
     return { success: true, messageId: data?.id }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown email error'
+    console.error('[EMAIL] Exception:', message)
     return { success: false, error: message }
   }
 }
@@ -58,9 +64,15 @@ export async function sendPetition(input: SubmissionInput): Promise<SubmissionRe
   return sendViaResend(input)
 }
 
-export function buildSubmissionSubject(resolutionNumbers: string[]): string {
+export function buildSubmissionSubject(resolutionNumbers: string[], defenseKeys: string[] = []): string {
   const nums = resolutionNumbers.map((n) => `No. ${n}`).join(' y ')
-  return `Impugnación Resoluciones ${nums} - Derecho de Petición`
+  if (defenseKeys.includes('prescripcion')) {
+    return `Prescripción Resoluciones ${nums} - Derecho de Petición`
+  }
+  if (defenseKeys.includes('caducidad')) {
+    return `Caducidad Resoluciones ${nums} - Derecho de Petición`
+  }
+  return `Revocatoria Directa Resoluciones ${nums} - Derecho de Petición`
 }
 
 export function buildSubmissionBody(input: {

@@ -1,4 +1,4 @@
-import { anthropic } from '@ai-sdk/anthropic'
+import { createGroq } from '@ai-sdk/groq'
 import { FOTOMAN_TOOLS, getSystemPrompt } from '@fotoman/ai'
 import {
   type UIMessage,
@@ -7,13 +7,15 @@ import {
   streamText,
 } from 'ai'
 
+const groq = createGroq()
+
 export const maxDuration = 60
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json()
 
   const result = streamText({
-    model: anthropic('claude-sonnet-4-20250514'),
+    model: groq('llama-3.3-70b-versatile'),
     system: getSystemPrompt(),
     messages: await convertToModelMessages(messages),
     tools: FOTOMAN_TOOLS,

@@ -58,9 +58,9 @@ export const generateDocumentTool = tool({
     hechos,
     defenseKeys,
   }) => {
-    const peticiones = buildDefaultPeticiones(fotomultas)
+    const peticiones = buildDefaultPeticiones(fotomultas, defenseKeys)
     const fundamentosDeDerecho = buildFundamentos(defenseKeys)
-    const refutacion = buildDefaultRefutacion()
+    const refutacion = buildDefaultRefutacion(defenseKeys)
     const pruebas = buildDefaultPruebas(fotomultas)
 
     const pdf = await generatePetitionPdf({

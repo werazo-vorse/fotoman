@@ -13,3 +13,4 @@ export {
 export { generateDocumentTool } from './document.js'
 export { createPaymentTool } from './payment.js'
 export { submitPetitionTool } from './submit.js'
+export { analyzeResponseTool, queryEffectivenessTool } from './outcomes.js'

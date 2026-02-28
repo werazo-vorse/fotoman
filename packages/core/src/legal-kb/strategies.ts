@@ -29,17 +29,30 @@ export const DEFENSE_STRATEGIES: DefenseStrategy[] = [
     name: 'Caducidad de la Acción Sancionatoria',
     description:
       'Ha transcurrido más de un año desde la comisión de la infracción sin que se haya proferido y notificado la resolución sancionatoria.',
-    requiredRefs: ['cnt-art161', 'constitucion-art29'],
+    requiredRefs: ['cnt-art161', 'ley-1437-2011-art52', 'constitucion-art29'],
     applicableWhen: 'elapsed_years(infraction_date, today) >= 1 AND no resolution notified',
   },
   {
     key: 'prescripcion',
     name: 'Prescripción de la Sanción',
     description:
-      'Han transcurrido más de tres años desde que la resolución sancionatoria quedó en firme sin que se haya iniciado cobro coactivo.',
-    requiredRefs: ['cnt-art159'],
+      'Han transcurrido más de tres años desde que la resolución sancionatoria quedó en firme sin que se haya iniciado cobro coactivo. ' +
+      'IMPORTANTE: Si existe cobro coactivo, la prescripción se INTERRUMPE y el plazo de 3 años se reinicia desde la fecha de notificación del mandamiento de pago. ' +
+      'Las autoridades frecuentemente emiten el cobro coactivo justo antes de cumplirse los 3 años para evitar la prescripción. ' +
+      'Sin embargo, muchas veces no notifican debidamente el cobro coactivo (ni personalmente ni por aviso), por lo que se debe solicitar prueba de la notificación efectiva.',
+    requiredRefs: [
+      'cnt-art159',
+      'ley-1437-2011-art52',
+      'estatuto-tributario-art826',
+      'constitucion-art74',
+      'cnt-art135',
+      'ley-962-2005',
+      'constitucion-art29',
+    ],
     applicableWhen:
-      'elapsed_years(resolution_firm_date, today) >= 3 AND no cobro coactivo initiated',
+      'elapsed_years(resolution_firm_date, today) >= 3 AND no cobro coactivo initiated, ' +
+      'OR cobro coactivo exists BUT elapsed_years(cobro_coactivo_notification_date, today) >= 3, ' +
+      'OR cobro coactivo exists BUT notification was never properly served (request proof)',
   },
   {
     key: 'vicios-tecnicos',
