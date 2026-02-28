@@ -1,7 +1,11 @@
+import { join } from 'path'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@fotoman/ai', '@fotoman/core', '@fotoman/pdf', '@fotoman/db', '@fotoman/jobs'],
+  outputFileTracingIncludes: {
+    '/api/**': [join(__dirname, '../../node_modules/.prisma/client/**')],
+  },
   webpack: (config) => {
     config.resolve = config.resolve || {}
     config.resolve.extensionAlias = {
