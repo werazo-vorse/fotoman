@@ -1,7 +1,3 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm --filter @fotoman/db generate && pnpm --filter @fotoman/web build",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
-  "outputDirectory": "packages/web/.next"
+  "$schema": "https://openapi.vercel.sh/vercel.json"
 }
